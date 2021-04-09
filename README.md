@@ -52,7 +52,7 @@ General cleanup operations are also carried out, as depicted below:
 - Script must be run with local Administrator priveleges.
 - Ensure local PowerShell policies permit execution.
 
-### Demonstration:
+#### Demonstration:
 
 Malware PE binary in NTFS volume;
 
