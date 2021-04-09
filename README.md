@@ -32,6 +32,10 @@ Common malware persistence mechanisms targetted include those mapped to MITRE AT
 - MITRE ATT&CK [T1546.003] Event Triggered Execution: Windows Management Instrumentation Event Subscription
 - MITRE ATT&CK [T1547.009] Boot or Logon Autostart Execution: Shortcut Modification
 - MITRE ATT&CK [T1564.004] Hide Artifacts: NTFS File Attributes
+- Winsock
+- AutoProxyTypes
+- Command Processor
+- Known DLL
 
 #### Cleanup Operations Supported:
 
