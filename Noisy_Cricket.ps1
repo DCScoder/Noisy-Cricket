@@ -1,7 +1,7 @@
 ###################################################################################
 #
 #    Script:    Noisy_Cricket.ps1
-#    Version:   1.0
+#    Version:   1.1
 #    Author:    Dan Saunders
 #    Contact:   dcscoder@gmail.com
 #    Purpose:   Windows malware persistence mechanism removal
@@ -23,7 +23,7 @@
 ###################################################################################
 
 $script = "Noisy_Cricket_"
-$version = "v1.0"
+$version = "v1.1"
 
 ########## Admin ##########
 
@@ -645,7 +645,32 @@ Write-Host "`nTask (16 / 22)   |  Removing any associated Scheduled Tasks." -For
 Write-Host "`nMITRE ATT&CK [T1053.005] Scheduled Task/Job: Scheduled Task" -ForegroundColor red -BackgroundColor black
 
 # Tasks
-schtasks /delete /tn "$revfn" /f
+$tasks = @()
+
+$schedule = New-Object -ComObject "Schedule.Service"
+$schedule.Connect()
+$out = @()
+
+    # Get Root Tasks
+$schedule.GetFolder($path).GetTasks(0) | % {
+    $xml = [xml]$_.xml
+    $out += New-Object psobject -Property @{
+        "Name" = $_.Name
+        "Path" = $_.Path
+        "LastRunTime" = $_.LastRunTime
+        "NextRunTime" = $_.NextRunTime
+        "Actions" = ($xml.Task.Actions.Exec | % { "$($_.Command) $($_.Arguments)" }) -join "`n"
+        }
+    }
+
+    # Iterate Tasks
+    foreach ($op in $out) {
+
+	if ($op.Actions -match $fn) {
+        schtasks /delete /tn $op.Name /f}
+
+	else {Write-Host "No hit found in Scheduled Task entry."}
+	}
 
 ########## Background Intelligent Transfer Service (BITS) ##########
 
@@ -735,7 +760,7 @@ Write-Host "`nTask (21 / 22)   |  Removing any unused Temporary files." -Foregro
 
 # Temp File Paths
 $temps = @("C:\Windows\Temp\*", "C:\Temp\*", "C:\Users\*\Appdata\Local\Temp\*")
-ForEach ($folder in $temps) {Remove-Item $folder -Force -Recurse -ea SilentlyContinue}
+foreach ($folder in $temps) {Remove-Item $folder -Force -Recurse -ea SilentlyContinue}
 Write-Host "Unused Temporary Files Cleaned."
 
 ########## New Technology File System (NTFS) ##########
